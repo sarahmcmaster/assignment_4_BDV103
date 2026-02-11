@@ -1,4 +1,7 @@
 {
+  "overrides": {
+  "is-generator-function": "1.1.0"
+},
   "name": "assignment-template",
   "version": "1.0.0",
   "description": "This is a template repository for the first assignment in BVD 103 at McMaster Continuing Education.",
