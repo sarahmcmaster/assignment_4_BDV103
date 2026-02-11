@@ -1,5 +1,6 @@
 services:
   dev:
+    platform: linux/amd64
     image: mcr.microsoft.com/devcontainers/typescript-node:1-20-bookworm
     user: root
     ports:
@@ -10,6 +11,7 @@ services:
       - MONGODB_URL=mongodb://mongo:27017
     command: sleep infinity
   mongo:
+    platform: linux/amd64
     image: mongo:latest
     ports:
       - "27017:27017"
