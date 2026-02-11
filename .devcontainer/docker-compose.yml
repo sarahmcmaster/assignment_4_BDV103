@@ -8,10 +8,12 @@ services:
     volumes:
       - ..:/workspaces:cached
     environment:
-      - MONGODB_URL=mongodb://mongo:27017
+      MONGODB_URL: "mongodb://mongo:27017"
+    depends_on:
+      - mongo
     command: sleep infinity
+
   mongo:
-    platform: linux/amd64
     image: mongo:latest
     ports:
       - "27017:27017"
