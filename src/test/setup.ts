@@ -13,7 +13,7 @@ beforeAll(async () => {
 
   // Otherwise fallback to MongoMemoryServer
   mongoServer = await MongoMemoryServer.create({
-    binary: { version: '4.4.29' } // avoids AVX issues on many systems
+    binary: { version: '6.0.15' } // works on GitHub Actions (no libcrypto.so.1.1)
   });
 
   const uri = mongoServer.getUri();
