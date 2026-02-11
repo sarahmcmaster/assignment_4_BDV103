@@ -4,9 +4,11 @@ services:
     image: mcr.microsoft.com/devcontainers/typescript-node:1-20-bookworm
     user: root
     ports:
+      - "3000:3000"
       - "9080:9080"
     volumes:
       - ..:/workspaces:cached
+      - node_modules:/workspaces/node_modules
     environment:
       MONGODB_URL: "mongodb://mongo:27017"
     depends_on:
@@ -19,3 +21,5 @@ services:
       - "27017:27017"
     volumes:
       - ./init:/docker-entrypoint-initdb.d
+volumes:
+  node_modules:
