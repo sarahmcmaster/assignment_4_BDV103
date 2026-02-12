@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { type ZodRouter } from 'koa-zod-router';
 import { getDatabase } from '../db';
 import { ObjectId, Db } from 'mongodb';
-import { getWarehouseStorage } from '../warehouse/memory-adapter';
-import type { WarehouseStorage } from '../warehouse/types';
+import { getBookStock } from '../warehouse/api';
+
 
 export interface BookWithId {
   id: string;
@@ -27,7 +27,7 @@ interface BookDocument {
 export async function lookupBookById(
   bookId: string,
   db: Db,
-  warehouse?: WarehouseStorage
+  includeStock = false
 ): Promise<BookWithId | null> {
   try {
     const objectId = ObjectId.createFromHexString(bookId);
@@ -47,10 +47,10 @@ export async function lookupBookById(
       image: document.image
     };
 
-    // Add stock if warehouse is provided
-    if (warehouse) {
-      book.stock = await warehouse.getTotalStock(bookId);
-    }
+    // Add stock if warehouse requests
+     if (includeStock) {
+  book.stock = await getBookStock(bookId);
+      }
 
     return book;
   } catch {
@@ -73,8 +73,8 @@ export default function lookupBookByIdRoute(router: ZodRouter): void {
     handler: async (ctx, next) => {
       const { id } = ctx.request.params;
       const db = getDatabase();
-      const warehouse = getWarehouseStorage();
-      const book = await lookupBookById(id, db, warehouse);
+      const book = await lookupBookById(id, db, true);
+
 
       if (book) {
         ctx.body = book;
