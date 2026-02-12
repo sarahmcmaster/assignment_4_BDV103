@@ -1,31 +1,26 @@
 import { z } from 'zod';
 import { type ZodRouter } from 'koa-zod-router';
 import { getOrdersStorage } from './memory-adapter';
-import { getWarehouseStorage } from '../warehouse/memory-adapter';
-import { getDatabase } from '../db';
-import { ObjectId } from 'mongodb';
+import { bookExists } from '../books/api';
+import { removeBooksFromShelf } from '../warehouse/api';
 import type { FulfillmentItem } from './types';
 
-// Helper to validate book IDs exist in the database
-async function validateBookIds(bookIds: string[]): Promise<{ valid: boolean; invalidIds: string[] }> {
-  const db = getDatabase();
-  const collection = db.collection('books');
+// Helper to validate book IDs exist via the Books subdomain API
+async function validateBookIds(
+  bookIds: string[]
+): Promise<{ valid: boolean; invalidIds: string[] }> {
   const invalidIds: string[] = [];
 
   for (const bookId of bookIds) {
-    try {
-      const objectId = ObjectId.createFromHexString(bookId);
-      const book = await collection.findOne({ _id: objectId });
-      if (!book) {
-        invalidIds.push(bookId);
-      }
-    } catch {
+    const exists = await bookExists(bookId);
+    if (!exists) {
       invalidIds.push(bookId);
     }
   }
 
   return { valid: invalidIds.length === 0, invalidIds };
 }
+
 
 export function registerOrderRoutes(router: ZodRouter): void {
   // Create an order
@@ -147,7 +142,6 @@ export function registerOrderRoutes(router: ZodRouter): void {
       const { orderId } = ctx.request.params;
       const { fulfillment } = ctx.request.body as { fulfillment: FulfillmentItem[] };
       const ordersStorage = getOrdersStorage();
-      const warehouse = getWarehouseStorage();
 
       // Get the order
       const order = await ordersStorage.getOrder(orderId);
@@ -186,14 +180,17 @@ export function registerOrderRoutes(router: ZodRouter): void {
       // Remove books from shelves
       try {
         for (const item of fulfillment) {
-          await warehouse.removeBooksFromShelf(item.book, item.numberOfBooks, item.shelf);
-        }
+       await removeBooksFromShelf(
+        item.book, 
+        item.numberOfBooks, 
+        item.shelf);
+         }
       } catch (err) {
-        ctx.status = 400;
-        ctx.body = { error: (err as Error).message };
-        await next();
-        return;
-      }
+          ctx.status = 400;
+          ctx.body = { error: (err as Error).message };
+          await next();
+         return;
+        }
 
       // Mark order as fulfilled
       await ordersStorage.fulfillOrder(orderId);

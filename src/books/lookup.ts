@@ -4,8 +4,6 @@ import { getDatabase } from '../db';
 import { ObjectId, Db } from 'mongodb';
 import { getBookStock } from '../warehouse/api';
 
-
-
 export interface BookWithId {
   id: string;
   name: string;
