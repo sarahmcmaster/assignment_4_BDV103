@@ -50,7 +50,8 @@ export async function lookupBookById(
     // Add stock if warehouse requests
      if (includeStock) {
   const warehouse = getWarehouseStorage();
-const stock = await warehouse.getTotalStock(bookId);
+  const stock = await warehouse.getTotalStock(bookId);
+  book.stock = stock;
       }
 
     return book;
