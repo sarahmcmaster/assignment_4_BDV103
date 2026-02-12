@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { type ZodRouter } from 'koa-zod-router';
 import { getDatabase } from '../db';
 import { ObjectId, Db } from 'mongodb';
-import { getBookStock } from '../warehouse/api';
+import { getWarehouseStorage } from '../warehouse/memory-adapter';
 
 
 export interface BookWithId {
@@ -49,7 +49,8 @@ export async function lookupBookById(
 
     // Add stock if warehouse requests
      if (includeStock) {
-  book.stock = await getBookStock(bookId);
+  const warehouse = getWarehouseStorage();
+const stock = await warehouse.getTotalStock(bookId);
       }
 
     return book;
