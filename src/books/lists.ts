@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { getDatabase } from '../db';
 import { type ZodRouter } from 'koa-zod-router';
-import { getWarehouseStorage } from '../warehouse/memory-adapter';
+import { getBookStock } from '../warehouse/api';
 
 interface BookDocument {
   name: string;
@@ -38,7 +38,6 @@ export default function booksList(router: ZodRouter): void {
     },
     handler: async (ctx, next) => {
       const { filters } = ctx.request.query;
-      const warehouse = getWarehouseStorage();
 
       const validFilters = filters?.filter(({ from, to, name, author }) =>
         typeof from === 'number' ||
@@ -76,7 +75,7 @@ export default function booksList(router: ZodRouter): void {
       const bookList: BookWithStock[] = await Promise.all(
         documents.map(async (document) => {
           const id = document._id.toHexString();
-          const stock = await warehouse.getTotalStock(id);
+          const stock =  await getBookStock(id);
           return {
             id,
             name: document.name,
