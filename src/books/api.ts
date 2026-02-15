@@ -1,6 +1,6 @@
 import { getDatabase } from '../db';
 import { ObjectId } from 'mongodb';
-
+// Expose only what other subdomains are allowed to use - hides adapter  
 export async function bookExists(bookId: string): Promise<boolean> {
   try {
     const db = getDatabase();
